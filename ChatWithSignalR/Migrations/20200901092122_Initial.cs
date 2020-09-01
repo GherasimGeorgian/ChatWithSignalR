@@ -97,7 +97,7 @@ namespace ChatWithSignalR.Migrations
                     Name = table.Column<string>(nullable: true),
                     Text = table.Column<string>(nullable: true),
                     Timestamp = table.Column<DateTime>(nullable: false),
-                    ChatId = table.Column<int>(nullable: true)
+                    ChatId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -107,7 +107,7 @@ namespace ChatWithSignalR.Migrations
                         column: x => x.ChatId,
                         principalTable: "Chats",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(

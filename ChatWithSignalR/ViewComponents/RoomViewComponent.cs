@@ -9,7 +9,7 @@ namespace ChatWithSignalR.ViewComponents
 {
     public class RoomViewComponent : ViewComponent
     {
-        private readonly AppDbContext _appDbContext;
+        private  AppDbContext _appDbContext;
         public RoomViewComponent(AppDbContext appDbContext)
         {
             _appDbContext = appDbContext;

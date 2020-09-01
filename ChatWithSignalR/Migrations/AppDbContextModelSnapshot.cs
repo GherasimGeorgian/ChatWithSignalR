@@ -44,7 +44,7 @@ namespace ChatWithSignalR.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("ChatId")
+                    b.Property<int>("ChatId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -266,9 +266,11 @@ namespace ChatWithSignalR.Migrations
 
             modelBuilder.Entity("ChatWithSignalR.Models.Message", b =>
                 {
-                    b.HasOne("ChatWithSignalR.Models.Chat", null)
+                    b.HasOne("ChatWithSignalR.Models.Chat", "Chat")
                         .WithMany("Messages")
-                        .HasForeignKey("ChatId");
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ChatWithSignalR.Models.User", b =>
