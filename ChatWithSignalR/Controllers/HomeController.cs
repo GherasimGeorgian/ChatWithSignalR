@@ -12,6 +12,7 @@ using System.Data.SqlClient;
 using Microsoft.IdentityModel.Protocols;
 using System.Configuration;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace ChatWithSignalR.Controllers
 {
@@ -29,19 +30,16 @@ namespace ChatWithSignalR.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            var chats = _appDbContext.Chats
+                .Include(x => x.Users)
+                .Where(x=> !x.Users
+                .Any(y=>y.UserId == User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                .ToList();
+            return View(chats);
         }
-        [HttpPost]
-        public async Task<IActionResult> CreateRoom(string name)
-        {
-            _appDbContext.Chats.Add(new Chat
-            {
-                Name = name,
-                Type = ChatType.Room
-            });
-            await _appDbContext.SaveChangesAsync();
-            return RedirectToAction("Index");
-        }
+        
+
+
         [HttpGet("{id}")]
         public IActionResult Chat(int id)
         {
@@ -84,6 +82,37 @@ namespace ChatWithSignalR.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateRoom(string name)
+        {
+            var chat = new Chat
+            {
+                Name = name,
+                Type = ChatType.Room
+            };
+            chat.Users.Add(new ChatUser
+            {
+                UserId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
+                Role = UserRole.Admin
+            });
+            _appDbContext.Chats.Add(chat);
+            await _appDbContext.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
+        [HttpGet]
+        public async Task<IActionResult> JoinRoom(int id)
+        {
+            var chatUser = new ChatUser
+            {
+                ChatId = id,
+                UserId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
+                Role = UserRole.Member
+            };
+            _appDbContext.ChatUsers.Add(chatUser);
+            await _appDbContext.SaveChangesAsync();
+            return RedirectToAction("Chat","Home", new { id = id});
         }
     }
 }

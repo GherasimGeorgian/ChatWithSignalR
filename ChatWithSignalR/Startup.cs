@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Routing.Template;
 using Newtonsoft.Json;
+using ChatWithSignalR.Hubs;
 
 namespace ChatWithSignalR
 {
@@ -50,7 +51,7 @@ namespace ChatWithSignalR
             })
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
-            
+            services.AddSignalR();
 
 
         }
@@ -71,6 +72,11 @@ namespace ChatWithSignalR
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseAuthentication();
+
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<ChatHub>("/chatHub");
+            });
 
             app.UseRouting();
             
