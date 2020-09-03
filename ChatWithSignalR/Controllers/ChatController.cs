@@ -20,25 +20,25 @@ namespace ChatWithSignalR.Controllers
         {
             _chat = chat;
         }
-        [HttpPost("[action]/{connectionId}/{roomName}")]
-        public async Task<IActionResult> JoinRoom(string connectionId, string roomName)
+        [HttpPost("[action]/{connectionId}/{roomId}")]
+        public async Task<IActionResult> JoinRoom(string connectionId, string roomId)
         {
-            await _chat.Groups.AddToGroupAsync(connectionId,roomName);
+            await _chat.Groups.AddToGroupAsync(connectionId, roomId);
             return Ok();
         }
-        [HttpPost("[action]/{connectionId}/{roomName}")]
-        public async Task<IActionResult> LeaveRoom(string connectionId, string roomName)
+        [HttpPost("[action]/{connectionId}/{roomId}")]
+        public async Task<IActionResult> LeaveRoom(string connectionId, string roomId)
         {
-            await _chat.Groups.AddToGroupAsync(connectionId, roomName);
+            await _chat.Groups.AddToGroupAsync(connectionId, roomId);
             return Ok();
         }
-
-        public async Task<IActionResult> SendMessage(string message,int chatId ,string roomName,[FromServices] AppDbContext appDbContext)
+        [HttpPost("[action]")]
+        public async Task<IActionResult> SendMessage(string message,int roomId, [FromServices] AppDbContext appDbContext)
         {
 
             var Message = new Message
             {
-                ChatId = chatId,
+                ChatId = roomId,
                 Text = message,
                 Name = User.Identity.Name,
                 Timestamp = DateTime.Now
@@ -46,7 +46,12 @@ namespace ChatWithSignalR.Controllers
             appDbContext.Messages.Add(Message);
 
             await appDbContext.SaveChangesAsync();
-            await _chat.Clients.Group(roomName).SendAsync("RecieveMessage",Message);
+            await _chat.Clients.Group(roomId.ToString()).SendAsync("RecieveMessage",new
+            {
+                Text = Message.Text,
+                Name = Message.Name,
+                Timestamp = Message.Timestamp.ToString("dd/MM/yyyy hh:mm:ss")
+            });
             return Ok();
         }
 

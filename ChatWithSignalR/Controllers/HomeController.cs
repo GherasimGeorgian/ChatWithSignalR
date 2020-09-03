@@ -7,12 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ChatWithSignalR.Models;
 using ChatWithSignalR.Data;
-using System.Data.Entity;
 using System.Data.SqlClient;
 using Microsoft.IdentityModel.Protocols;
 using System.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 
 namespace ChatWithSignalR.Controllers
 {
@@ -29,11 +29,10 @@ namespace ChatWithSignalR.Controllers
         }
 
         public IActionResult Index()
-        {
+        {  
             var chats = _appDbContext.Chats
                 .Include(x => x.Users)
-                .Where(x=> !x.Users
-                .Any(y=>y.UserId == User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                .Where(x=> !x.Users.Any(y=>y.UserId == User.FindFirst(ClaimTypes.NameIdentifier).Value) && x.Type == ChatType.Room)
                 .ToList();
             return View(chats);
         }
@@ -43,18 +42,23 @@ namespace ChatWithSignalR.Controllers
         [HttpGet("{id}")]
         public IActionResult Chat(int id)
         {
-            
-            var chat = _appDbContext.Chats.Include(x => x.Messages)
-                .FirstOrDefault(x => x.Id == id);
+            var result = _appDbContext.Chats
+               .Include(x => x.Users)
+               .Where(x => x.Users.Any(y => y.UserId == User.FindFirst(ClaimTypes.NameIdentifier).Value) && x.Id == id)
+               .ToList();
+            //verificam daca suntem in chatul respectiv
+            if (result.Count == 0)
+            {
+                return RedirectToAction("Privacy");
+            }
+            else
+            {
+                var chat = _appDbContext.Chats.Include(x => x.Messages)
+                            .FirstOrDefault(x => x.Id == id);
 
-            var messages = _appDbContext.Messages
-                .Include(x => x.Text)
-                .Where(x => x.ChatId == id)
-                .ToList();
-            chat.Messages = messages;
-
-
-            return View(chat);
+                return View(chat);
+            }
+           
         }
         [HttpPost]
         public async Task<IActionResult> CreateMessage(int chatId, string message)
@@ -76,6 +80,74 @@ namespace ChatWithSignalR.Controllers
         public IActionResult Privacy()
         {
             return View();
+        }
+
+        public IActionResult Find()
+        {
+            var users = _appDbContext.Users
+                .Where(x => x.Id != User.FindFirst(ClaimTypes.NameIdentifier).Value)
+                .ToList();
+            return View(users);
+        }
+
+        public IActionResult Private()
+        {
+            var chats = _appDbContext.Chats
+               .Include(x => x.Users)
+                  .ThenInclude(x => x.User)
+               .Where(x => x.Type == ChatType.Private
+                  && x.Users.Any(y => y.UserId == User.FindFirst(ClaimTypes.NameIdentifier).Value))
+               .ToList();
+            return View(chats);
+        }
+
+
+        public async Task<IActionResult> CreatePrivateRoom(string userId)
+        {
+            //chaturile private in care este userul actual
+            var chatsMy = _appDbContext.Chats
+                .Include(x => x.Users)
+                   .ThenInclude(x => x.User)
+                .Where(x => x.Type == ChatType.Private
+                   && x.Users.Any(y => y.UserId == User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                .Select(x => x.Id)
+                .ToList();
+            //chaturile private in care se afla userul cu care vrea sa comunice
+            var chatsFrend = _appDbContext.Chats
+               .Include(x => x.Users)
+                  .ThenInclude(x => x.User)
+               .Where(x => x.Type == ChatType.Private
+                  && x.Users.Any(y => y.UserId == userId))
+               .Select(x => x.Id)
+               .ToList();
+
+            var result = chatsMy.Intersect(chatsFrend);
+
+            if (result.Count() == 0)
+            {
+
+                var chat = new Chat
+                {
+                    Type = ChatType.Private
+                };
+                chat.Users.Add(new ChatUser
+                {
+                    UserId = userId
+                });
+
+                chat.Users.Add(new ChatUser
+                {
+                    UserId = User.FindFirst(ClaimTypes.NameIdentifier).Value
+                });
+                _appDbContext.Chats.Add(chat);
+
+                await _appDbContext.SaveChangesAsync();
+                return RedirectToAction("Chat", new { id = chat.Id });
+            }
+            else
+            {
+                return RedirectToAction("Index");
+            }
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
