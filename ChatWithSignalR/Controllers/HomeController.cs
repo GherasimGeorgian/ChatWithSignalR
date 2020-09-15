@@ -21,15 +21,21 @@ namespace ChatWithSignalR.Controllers
     {
         private readonly ILogger<HomeController> _logger;
 
+        private readonly IMessageRepository _messageRepository;
         private AppDbContext _appDbContext;
-        public HomeController(ILogger<HomeController> logger, AppDbContext appDbContext)
+        public HomeController(ILogger<HomeController> logger, AppDbContext appDbContext,IMessageRepository messageRepository)
         {
             _logger = logger;
             _appDbContext = appDbContext;
+            _messageRepository = messageRepository;
         }
-
+        public IActionResult GetMessages()
+        {
+            return Ok(_messageRepository.GetAllMessages());
+        }
         public IActionResult Index()
-        {  
+        {
+          
             var chats = _appDbContext.Chats
                 .Include(x => x.Users)
                 .Where(x=> !x.Users.Any(y=>y.UserId == User.FindFirst(ClaimTypes.NameIdentifier).Value) && x.Type == ChatType.Room)

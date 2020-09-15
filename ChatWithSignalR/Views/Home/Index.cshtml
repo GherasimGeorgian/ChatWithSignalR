@@ -1,7 +1,59 @@
 ﻿@model IEnumerable<Chat>
-    <div class="chat-body">
-        @foreach (var chat in Model)
-        {
-            <a class="room-button" asp-controller="Home" asp-action="JoinRoom" asp-route-id="@chat.Id">@chat.Name</a>
-        }
-    </div>
+<div class="chat-body">
+    @foreach (var chat in Model)
+    {
+        <a class="room-button" asp-controller="Home" asp-action="JoinRoom" asp-route-id="@chat.Id">@chat.Name</a>
+    }
+    <table>
+        <thead>
+            <tr>
+                <td>Id</td>
+                <td>Name</td>
+                <td>ChatId</td>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+    </table>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="~/lib/signalr/dist/browser/signalr.js"></script>
+
+<script>
+    //insert into Messages(Name, Text, Timestamp, ChatId) values('xxx', 'plm', GETDATE(), 30)
+        $(() => {
+            let connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build()
+
+            connection.start()
+
+            connection.on("refreshMessages", function () {
+                loadData()
+            })
+
+            loadData();
+
+            function loadData() {
+                var tr = ''
+
+                $.ajax({
+                    url: '/Home/GetMessages',
+                    method: 'GET',
+                    success: (result) => {
+                        $.each(result, (k, v) => {
+                            tr = tr + `<tr>
+                        <td>${v.id}</td>
+                        <td>${v.name}</td>
+                        <td>${v.chatId}</td>
+                    </tr>`
+                        })
+
+                        $("#tableBody").html(tr)
+                    },
+                    error: (error) => {
+                        console.log(error)
+                    }
+                })
+            }
+        })
+</script>

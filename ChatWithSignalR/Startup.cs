@@ -17,13 +17,16 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Routing.Template;
 using Newtonsoft.Json;
+
 using ChatWithSignalR.Hubs;
+using Microsoft.AspNet.SignalR.Infrastructure;
 
 namespace ChatWithSignalR
 {
     public class Startup
     {
         public IConfiguration Configuration;
+     
 
         public Startup(IConfiguration configuration)
         {
@@ -35,12 +38,14 @@ namespace ChatWithSignalR
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            
             services.AddControllersWithViews();
 
            // services.AddMvc().AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
             services.AddDbContext<AppDbContext>(options =>
                    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddTransient<IMessageRepository, MessageRepository>();
 
             services.AddIdentity<User, IdentityRole>(options => {
                 options.Password.RequireDigit = false;
@@ -52,7 +57,7 @@ namespace ChatWithSignalR
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
             services.AddSignalR();
-
+            
 
         }
 
@@ -72,6 +77,8 @@ namespace ChatWithSignalR
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseAuthentication();
+
+          
 
             app.UseSignalR(routes =>
             {
