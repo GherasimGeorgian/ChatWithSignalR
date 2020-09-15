@@ -4,3 +4,5 @@ SignalR - Real Time Chat Application
 - Register
 - Create Room
 - Private Chat
+
+ToDo: Count number of online users
