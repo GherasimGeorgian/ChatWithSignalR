@@ -54,6 +54,47 @@ namespace ChatWithSignalR
             }
             return messages;
         }
+
+        public List<Message> GetAllNotifications()
+        {
+            var notifications = new List<Message>();
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                SqlDependency.Start(connectionString);
+
+                string commandText = "select Id, Name, ChatId from dbo.Messages where ChatId = 28";
+
+                SqlCommand cmd = new SqlCommand(commandText, conn);
+
+                SqlDependency dependency = new SqlDependency(cmd);
+
+                dependency.OnChange += new OnChangeEventHandler(sqlDep_OnChange);
+
+                var reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var Message = new Message
+                    {
+                        Id = Convert.ToInt32(reader["Id"]),
+                        Name = reader["Name"].ToString(),
+                        ChatId = Convert.ToInt32(reader["ChatId"])
+                    };
+
+                    notifications.Add(Message);
+                }
+            }
+            return notifications;
+        }
+
+        void sqlDep_OnChange(object sender, SqlNotificationEventArgs e)
+        {
+            _contextHub.Clients.All.SendAsync("added");
+        }
+
         private void dbChangeNotification(object sender, SqlNotificationEventArgs e)
         {
             _contextHub.Clients.All.SendAsync("refreshMessages");

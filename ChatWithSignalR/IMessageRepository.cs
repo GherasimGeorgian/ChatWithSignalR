@@ -9,5 +9,7 @@ namespace ChatWithSignalR
     public interface IMessageRepository
     {
         List<Message> GetAllMessages();
+
+        List<Message> GetAllNotifications();
     }
 }

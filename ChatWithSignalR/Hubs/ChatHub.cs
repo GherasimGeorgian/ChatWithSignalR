@@ -9,5 +9,6 @@ namespace ChatWithSignalR.Hubs
     public class ChatHub : Hub
     {
         public string GetConnectionId() => Context.ConnectionId;
+
     }
 }

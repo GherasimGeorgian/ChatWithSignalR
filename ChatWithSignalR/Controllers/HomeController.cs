@@ -33,6 +33,13 @@ namespace ChatWithSignalR.Controllers
         {
             return Ok(_messageRepository.GetAllMessages());
         }
+        public IActionResult GetNotifications()
+        {
+            return Ok(_messageRepository.GetAllNotifications());
+        }
+
+        
+
         public IActionResult Index()
         {
           
