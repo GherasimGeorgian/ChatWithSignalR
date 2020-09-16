@@ -103,93 +103,103 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     @*Add jQuery code for get  notification & setup  signalR*@
-    <script type="text/javascript">
+<script type="text/javascript">
 
-        $(function () {
-            //click on notification icon for show notification
-            $('span.noti').click(function (e) {
-                e.stopPropagation();
-                $('.noti-content').show();
-                var count = 0;
-                count = parseInt($('span.count').html()) || 0;
-                //only load notification if not already loaded
-                if (count > 0) {
-                    updateNotification();
-                }
-                $('span.count', this).html('&nbsp');
-            })
-            //hide notifications
-            $('html').click(function () {
-                $('.noti-content').hide();
-            })
-            //update notification
-            function updateNotification() {
-                $('#notiContent').empty();
-                $('#notiContent').append($('<li>Loading...</li>'));
-                $.ajax({
-                    type: 'GET',
-                    url: '/Home/GetNotifications',
-
-                    success: (result) => {
-                        $('#notiContent').empty();
-                        if (result.length == 0) {
-                            $('#notiContent').append($('<li>No data avariable</li>'));
-                        }
-
-                        $.each(result, (k, v) => {
-                            $('#notiContent').append($(`<li>New Contact : ${v.id} -- ${v.name}  added </li>`))
-
-                        })
-
-
-                    },
-
-
-                    error: function (error) {
-                        console.log(error);
-                    }
-                })
-            }
-
-            $(() => {
-
-
-                //update notification count
-                function updateNotificationCount() {
-                    var count = 0;
-                    count = parseInt($('span.count').html()) || 0;
-                    count++;
-                    $('span.count').html(count);
-                }
-
-                let connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build()
-
-                connection.start()
-
-                connection.on("added", function () {
-                    updateNotificationCount();
-                    updateNotification();
-
-
-                })
-
+    $(function () {
+        //click on notification icon for show notification
+        $('span.noti').click(function (e) {
+            e.stopPropagation();
+            $('.noti-content').show();
+            var count = 0;
+            count = parseInt($('span.count').html()) || 0;
+            //only load notification if not already loaded
+            if (count > 0) {
                 updateNotification();
-
-
-
-
-
-
-
-            })
+            }
+            $('span.count', this).html('&nbsp');
+        })
+        //hide notifications
+        $('html').click(function () {
+            $('.noti-content').hide();
         })
 
-        
+        //update notification count
+        function updateNotificationCount() {
+            var count = 0;
+            count = parseInt($('span.count').html()) || 0;
+            count++;
+            $('span.count').html(count);
+        }
 
-        
-       
+        //update notification
+        function updateNotification() {
+            console.log('Notificare!')
+            $('#notiContent').empty();
+            $('#notiContent').append($('<li>Loading...</li>'));
+            $.ajax({
+                type: 'GET',
+                url: '/Home/GetNotifications',
 
-        
+                success: (result) => {
+                    $('#notiContent').empty();
+                    if (result.length == 0) {
+                        $('#notiContent').append($('<li>No data avariable</li>'));
+                    }
+
+                    $.each(result, (k, v) => {
+                        $('#notiContent').append($(`<li>New Contact : ${v.id} -- ${v.name}  added </li>`))
+
+                    })
+
+
+                },
+
+
+                error: function (error) {
+                    console.log(error);
+                }
+            })
+        }
+
+        $(() => {
+
+
+
+            var _connectionId = '';
+            let connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build()
+
+
+
+            connection.start()
+                .then(function () {
+                    connection.invoke('getConnectionId')
+                        .then(function (connectionId) {
+                            _connectionId = connectionId
+                            console.log('Connection Start!')
+                        })
+                })
+                .catch(function (err) {
+                    console.log(err)
+                })
+
+
+
+            connection.on("added", function () {
+                console.log('Connection On!')
+                updateNotificationCount();
+                updateNotification();
+            })
+
+            updateNotification();
+
+
+
+
+
+
+
+        })
+    })
 
 
 
@@ -200,8 +210,15 @@
 
 
 
-       
 
-    </script>
+
+
+
+
+
+
+
+
+</script>
 </body>
 </html>

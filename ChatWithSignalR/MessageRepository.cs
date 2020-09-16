@@ -92,7 +92,10 @@ namespace ChatWithSignalR
 
         void sqlDep_OnChange(object sender, SqlNotificationEventArgs e)
         {
-            _contextHub.Clients.All.SendAsync("added");
+            
+                _contextHub.Clients.All.SendAsync("added");
+
+         
         }
 
         private void dbChangeNotification(object sender, SqlNotificationEventArgs e)
