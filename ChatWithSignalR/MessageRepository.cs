@@ -29,34 +29,36 @@ namespace ChatWithSignalR
         List<Message> messages;
         public List<Message> GetAllMessages()
         {
+
             messages = new List<Message>();
-            SingletonDbConnect conn = SingletonDbConnect.getDbInstance();
-            using (HomeController.command = new SqlCommand("select Id, Name, ChatId from dbo.Messages", conn.getDbConnection()))
-                {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
 
-                    HomeController.command.Notification = null;
-
-                    if (HomeController.dependency == null)
-                    {
-                        HomeController.dependency = new SqlDependency(HomeController.command);
-                        HomeController.dependency.OnChange +=GetAllMessagesDep_OnChange;
-                    }
-                    var reader = HomeController.command.ExecuteReader();
-
-
-                    while (reader.Read())
-                    {
-                        var Message = new Message
-                        {
-                            Id = Convert.ToInt32(reader["Id"]),
-                            Name = reader["Name"].ToString(),
-                            ChatId = Convert.ToInt32(reader["ChatId"])
-                        };
-
-                        messages.Add(Message);
-                    }
-                }
                 
+
+                string commandText = "select Id, Name, ChatId from dbo.Messages";
+
+                SqlCommand cmd = new SqlCommand(commandText, conn);
+
+                SqlDependency dependency = new SqlDependency(cmd);
+
+                dependency.OnChange += new OnChangeEventHandler(GetAllMessagesDep_OnChange);
+
+                var reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var Message = new Message
+                    {
+                        Id = Convert.ToInt32(reader["Id"]),
+                        Name = reader["Name"].ToString(),
+                        ChatId = Convert.ToInt32(reader["ChatId"])
+                    };
+
+                    messages.Add(Message);
+                }
+            }
             return messages;
 
         }
@@ -72,8 +74,11 @@ namespace ChatWithSignalR
 
                     if (HomeController.dependency == null)
                     {
-                        HomeController.dependency = new SqlDependency(HomeController.command);
-                        HomeController.dependency.OnChange += new OnChangeEventHandler(GetAllNotificationsDep_OnChange);
+                    SqlDependency dependency = new SqlDependency(HomeController.command);
+
+                    dependency.OnChange += new OnChangeEventHandler(GetAllNotificationsDep_OnChange);
+                   // HomeController.dependency = new SqlDependency(HomeController.command);
+                    //    HomeController.dependency.OnChange += new OnChangeEventHandler(GetAllNotificationsDep_OnChange);
                     }
                     var reader = HomeController.command.ExecuteReader();
 
@@ -97,32 +102,22 @@ namespace ChatWithSignalR
         private void GetAllNotificationsDep_OnChange(object sender, SqlNotificationEventArgs e)
         {
 
-            // 1. unsubscribe the event
-            SqlDependency dependency = sender as SqlDependency;
-            dependency.OnChange -= GetAllNotificationsDep_OnChange;
+            //// 1. unsubscribe the event
+            //SqlDependency dependency = sender as SqlDependency;
+            //dependency.OnChange -= GetAllNotificationsDep_OnChange;
 
 
 
             _contextHub.Clients.All.SendAsync("added");
 
          
-            GetAllNotifications();
+            //GetAllNotifications();
         }
             private void GetAllMessagesDep_OnChange(object sender, SqlNotificationEventArgs e)
             {
-    
-             if (e.Type == SqlNotificationType.Change)
-              {
-
-                 if (HomeController.dependency != null)
-                 {
-                     HomeController.dependency.OnChange -= GetAllMessagesDep_OnChange;
-                 }
-
-                 _contextHub.Clients.All.SendAsync("refreshMessages");
-
-                GetAllMessages();
-               }
+           
+            _contextHub.Clients.All.SendAsync("refreshMessages");
+         
             }
 
 
