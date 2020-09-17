@@ -13,6 +13,8 @@ using System.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
+using System.Threading;
 
 namespace ChatWithSignalR.Controllers
 {
@@ -23,18 +25,30 @@ namespace ChatWithSignalR.Controllers
 
         private readonly IMessageRepository _messageRepository;
         private AppDbContext _appDbContext;
+
+       
+
+        internal static SqlCommand command = null;
+        internal static SqlDependency dependency = null;
+        
         public HomeController(ILogger<HomeController> logger, AppDbContext appDbContext,IMessageRepository messageRepository)
         {
+          
             _logger = logger;
             _appDbContext = appDbContext;
             _messageRepository = messageRepository;
         }
         public IActionResult GetMessages()
         {
+            Thread.Sleep(2000);
+            
             return Ok(_messageRepository.GetAllMessages());
         }
         public IActionResult GetNotifications()
         {
+            Thread.Sleep(1000);
+         
+
             return Ok(_messageRepository.GetAllNotifications());
         }
 

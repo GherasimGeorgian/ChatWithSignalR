@@ -28,7 +28,9 @@
             connection.start()
 
             connection.on("refreshMessages", function () {
+                console.log('Refresh table')
                 loadData()
+                
             })
 
             loadData();

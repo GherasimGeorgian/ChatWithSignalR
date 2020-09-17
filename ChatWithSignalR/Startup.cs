@@ -20,6 +20,7 @@ using Newtonsoft.Json;
 
 using ChatWithSignalR.Hubs;
 using Microsoft.AspNet.SignalR.Infrastructure;
+using Microsoft.Data.SqlClient;
 
 namespace ChatWithSignalR
 {
@@ -33,12 +34,12 @@ namespace ChatWithSignalR
             Configuration = configuration;
         }
 
-        
+        SingletonDbConnect conn = SingletonDbConnect.getDbInstance();
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            
+            SqlDependency.Start(conn.getDbConnection().ConnectionString);
             services.AddControllersWithViews();
 
            // services.AddMvc().AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);

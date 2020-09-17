@@ -11,5 +11,6 @@ namespace ChatWithSignalR
         List<Message> GetAllMessages();
 
         List<Message> GetAllNotifications();
+       
     }
 }
