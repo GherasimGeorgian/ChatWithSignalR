@@ -10,6 +10,7 @@
             <p>@msg.Text</p>
             <footer>@msg.Timestamp</footer>
         </div>
+
     }
 </div>
 
@@ -35,13 +36,7 @@
         connection.on("RecieveMessage", function (data2) {
 
 
-            var message = document.createElement("div")
-            message.classList.add('message')
-
-            var header = document.createElement("header")
-            header.appendChild(document.createTextNode(data2.name))
-
-            var p = document.createElement("p")
+           
 
             var current_user = -1;
          getCurentUser()
@@ -50,11 +45,22 @@
             console.log(data2.currentUser);
             console.log(data);
 
+           var message = document.createElement("div")
+
+          if (data2.currentUser == data)
+               message.classList.add('message_left')
+           else
+              message.classList.add('message_right')
+
+           var header = document.createElement("header")
+           header.appendChild(document.createTextNode(data2.name))
+
+           var p = document.createElement("p")
 
            if (data2.currentUser == data)
-                p.classList.add('p_color_message_blue')
+               p.classList.add('p_color_message_left')
             else
-                p.classList.add('p_color_message_green')
+               p.classList.add('p_color_message_right')
 
             p.appendChild(document.createTextNode(data2.text))
 
@@ -67,9 +73,7 @@
 
             document.querySelector('.chat-body').append(message)
 
-
-                    //console.log(data2)
-                });
+            });
         })
 
         function getCurentUser(){
