@@ -82,7 +82,6 @@ namespace ChatWithSignalR.Controllers
             {
                 var chat = _appDbContext.Chats.Include(x => x.Messages)
                             .FirstOrDefault(x => x.Id == id);
-
                 return View(chat);
             }
            

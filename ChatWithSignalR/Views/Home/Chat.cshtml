@@ -2,16 +2,16 @@
 
 <div class="chat-body">
 
-    @foreach (var msg in Model.Messages)
+    @*@foreach (var msg in Model.Messages)
     {
-
+      
         <div class="message">
             <header>@msg.Name</header>
             <p>@msg.Text</p>
             <footer>@msg.Timestamp</footer>
         </div>
 
-    }
+    }*@
 </div>
 
 <form class="chat-input" onsubmit="sendMessage(event)" asp-controller="Home" asp-action="CreateMessage">
@@ -27,6 +27,36 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script>
 
+
+        function loadMessages() {
+
+           var sourcearray = JSON.parse('@Html.Raw(Json.Serialize(Model.Messages))');
+            console.log(sourcearray)
+            var arr = ['example1', 'example2', 'example3']
+            console.log(arr)
+
+
+            for (var i = 0; i < sourcearray.length; i++) {
+
+                var message = document.createElement("div")
+                message.classList.add('message')
+
+                var footer = document.createElement("footer")
+
+                footer.appendChild(document.createTextNode(sourcearray[i].chatId))
+
+
+                message.appendChild(footer);
+                document.querySelector('.chat-body').append(message)
+
+            } 
+
+
+         
+
+         }
+        loadMessages();
+
         var connection = new signalR.HubConnectionBuilder()
             .withUrl("/chatHub")
             .build();
@@ -36,12 +66,12 @@
         connection.on("RecieveMessage", function (data2) {
 
 
-           
+
 
             var current_user = -1;
          getCurentUser()
                 .then(data => {
-                 
+
             console.log(data2.currentUser);
             console.log(data);
 

@@ -58,7 +58,10 @@ namespace ChatWithSignalR
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
             services.AddSignalR();
-            
+            services.AddControllersWithViews()
+                 .AddNewtonsoftJson(options =>
+               options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+                );
 
         }
 
