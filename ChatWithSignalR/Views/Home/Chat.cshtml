@@ -4,6 +4,7 @@
 
     @foreach (var msg in Model.Messages)
     {
+
         <div class="message">
             <header>@msg.Name</header>
             <p>@msg.Text</p>
@@ -22,6 +23,7 @@
 @section scripts{
     <script src="~/js/signalr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script>
 
         var connection = new signalR.HubConnectionBuilder()
@@ -30,27 +32,56 @@
 
         var _connectionId = '';
 
-        connection.on("RecieveMessage", function (data) {
-          
+        connection.on("RecieveMessage", function (data2) {
+
+
             var message = document.createElement("div")
             message.classList.add('message')
 
             var header = document.createElement("header")
-            header.appendChild(document.createTextNode(data.name))
+            header.appendChild(document.createTextNode(data2.name))
 
             var p = document.createElement("p")
-            p.appendChild(document.createTextNode(data.text))
+
+            var current_user = -1;
+         getCurentUser()
+                .then(data => {
+                 
+            console.log(data2.currentUser);
+            console.log(data);
+
+
+           if (data2.currentUser == data)
+                p.classList.add('p_color_message_blue')
+            else
+                p.classList.add('p_color_message_green')
+
+            p.appendChild(document.createTextNode(data2.text))
 
             var footer = document.createElement("footer")
-            footer.appendChild(document.createTextNode(data.timestamp))
+            footer.appendChild(document.createTextNode(data2.timestamp))
 
             message.appendChild(header);
             message.appendChild(p);
             message.appendChild(footer);
 
-             document.querySelector('.chat-body').append(message)
+            document.querySelector('.chat-body').append(message)
+
+
+                    //console.log(data2)
+                });
         })
-        
+
+        function getCurentUser(){
+
+            return axios.get('/Chat/GetCurrentUser')
+                .then(response => {
+                    this.response = response.data
+                    return this.response
+                })
+        }
+
+
         var joinRoom = function () {
             var url = '/Chat/JoinRoom/' + _connectionId + '/@Model.Id'
             axios.post(url, null)
@@ -72,10 +103,10 @@
             .catch(function (err) {
                 console.log(err)
             })
-       
+
         var sendMessage = function (event) {
             event.preventDefault();
-            
+
 
             var data = new FormData(event.target)
             document.getElementById('message-input').value = '';
@@ -88,6 +119,6 @@
                     console.log("Failed to sent message!")
                 })
         }
-      
+
     </script>
 }

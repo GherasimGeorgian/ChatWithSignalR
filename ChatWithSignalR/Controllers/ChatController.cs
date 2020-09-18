@@ -8,6 +8,8 @@ using ChatWithSignalR.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
+using System.Threading;
 
 namespace ChatWithSignalR.Controllers
 {
@@ -18,8 +20,17 @@ namespace ChatWithSignalR.Controllers
         IHubContext<ChatHub> _chat;
         public ChatController(IHubContext<ChatHub> chat)
         {
+           
             _chat = chat;
         }
+        [HttpGet("[action]")]
+        public IActionResult GetCurrentUser()
+        {
+           
+            return Ok(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        }
+
+
         [HttpPost("[action]/{connectionId}/{roomId}")]
         public async Task<IActionResult> JoinRoom(string connectionId, string roomId)
         {
@@ -44,13 +55,15 @@ namespace ChatWithSignalR.Controllers
                 Timestamp = DateTime.Now
             };
             appDbContext.Messages.Add(Message);
+            
 
             await appDbContext.SaveChangesAsync();
-            await _chat.Clients.Group(roomId.ToString()).SendAsync("RecieveMessage",new
+            await _chat.Clients.Group(roomId.ToString()).SendAsync("RecieveMessage", new
             {
                 Text = Message.Text,
                 Name = Message.Name,
-                Timestamp = Message.Timestamp.ToString("dd/MM/yyyy hh:mm:ss")
+                Timestamp = Message.Timestamp.ToString("dd/MM/yyyy hh:mm:ss"),
+                CurrentUser = User.FindFirst(ClaimTypes.NameIdentifier).Value.ToString()
             });
             return Ok();
         }

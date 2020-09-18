@@ -83,12 +83,23 @@ body {
     flex-direction: row;
     margin-top: 0.2rem;
 }
+.message_right {
+    display: flex;
+    flex-direction: row;
+    margin-top: 0.2rem;
+}
+.p_color_message_blue {
+    color: blue;
+}
 
-    .message > header {
-        font-weight: bold;
-        min-width: 100px;
-        text-align: right;
-    }
+.p_color_message_green {
+    color: green;
+}
+.message > header {
+    font-weight: bold;
+    min-width: 100px;
+    text-align: right;
+}
 
     .message > * {
         padding: 0.2rem;
