@@ -182,7 +182,14 @@
                     console.log(err)
                 })
 
+          
 
+            connection.on("initSignal", (message) => {
+
+                console.log("We got signal! and the message is: " + message);
+
+            });
+           
 
             connection.on("added", function () {
                 console.log('Connection On!')
@@ -192,6 +199,7 @@
                 updateNotification();
              
             })
+           
 
             updateNotification();
 

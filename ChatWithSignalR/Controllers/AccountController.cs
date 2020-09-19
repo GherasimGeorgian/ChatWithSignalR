@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ChatWithSignalR.Hubs;
 using ChatWithSignalR.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ChatWithSignalR.Controllers
 {
@@ -12,10 +14,12 @@ namespace ChatWithSignalR.Controllers
     {
         SignInManager<User> _signInManager;
         UserManager<User> _userManager;
-        public AccountController(UserManager<User> userManager,SignInManager<User> signInManager)
+        IHubContext<ChatHub> _chat;
+        public AccountController(IHubContext<ChatHub> chat, UserManager<User> userManager,SignInManager<User> signInManager)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _chat = chat;
         }
 
             [HttpGet]
@@ -29,10 +33,12 @@ namespace ChatWithSignalR.Controllers
             var user = await _userManager.FindByNameAsync(username);
             if (user != null) {
                 var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
-               
+
                 if (result.Succeeded)
+                {
+                   
                     return RedirectToAction("Index", "Home");
- 
+                }
                
             }
             return RedirectToAction("Login", "Account");

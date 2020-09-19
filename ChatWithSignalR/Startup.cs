@@ -63,6 +63,16 @@ namespace ChatWithSignalR
                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
                 );
 
+            services.AddDistributedMemoryCache();
+
+            services.AddSession(options =>
+            {
+                options.Cookie.Name = ".AdventureWorks.Session";
+                options.IdleTimeout = TimeSpan.FromSeconds(10);
+                options.Cookie.IsEssential = true;
+            });
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -90,7 +100,7 @@ namespace ChatWithSignalR
             });
 
             app.UseRouting();
-            
+            app.UseSession();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

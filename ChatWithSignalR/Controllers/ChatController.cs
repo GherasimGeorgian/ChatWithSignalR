@@ -51,7 +51,7 @@ namespace ChatWithSignalR.Controllers
         [HttpPost("[action]/{connectionId}/{roomId}")]
         public async Task<IActionResult> LeaveRoom(string connectionId, string roomId)
         {
-            await _chat.Groups.AddToGroupAsync(connectionId, roomId);
+            await _chat.Groups.RemoveFromGroupAsync(connectionId, roomId);
             return Ok();
         }
         [HttpPost("[action]")]
