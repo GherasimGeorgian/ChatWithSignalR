@@ -18,16 +18,27 @@ namespace ChatWithSignalR.Controllers
     public class ChatController : Controller
     {
         IHubContext<ChatHub> _chat;
-        public ChatController(IHubContext<ChatHub> chat)
+        private AppDbContext _appDbContext;
+        public ChatController(IHubContext<ChatHub> chat, AppDbContext appDbContext)
         {
            
             _chat = chat;
+            _appDbContext = appDbContext;
         }
         [HttpGet("[action]")]
-        public IActionResult GetCurrentUser()
+        public IActionResult GetCurrentUserId()
         {
            
             return Ok(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        }
+
+        [HttpGet("[action]")]
+        public IActionResult GetCurrentUserName()
+        {
+            var user = _appDbContext.Users
+               .Where(x => x.Id == User.FindFirst(ClaimTypes.NameIdentifier).Value)
+               .FirstOrDefault();
+            return Ok(user.UserName);
         }
 
 

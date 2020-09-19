@@ -30,27 +30,54 @@
 
         function loadMessages() {
 
+        getCurentUserName()
+              .then(data => {
+
            var sourcearray = JSON.parse('@Html.Raw(Json.Serialize(Model.Messages))');
             console.log(sourcearray)
-            var arr = ['example1', 'example2', 'example3']
-            console.log(arr)
+           
 
 
             for (var i = 0; i < sourcearray.length; i++) {
 
-                var message = document.createElement("div")
-                message.classList.add('message')
+               
+
+                        console.log(data);
+                        var message = document.createElement("div")
+              
+
+                if (sourcearray[i].name == data)
+                    message.classList.add('message_left')
+                else
+                    message.classList.add('message_right')
+
+                var header = document.createElement("header")
+                header.appendChild(document.createTextNode(sourcearray[i].name))
+
+
+                var p = document.createElement("p")
+
+                if (sourcearray[i].name == data)
+                    p.classList.add('p_color_message_left')
+                else
+                    p.classList.add('p_color_message_right')
+
+                p.appendChild(document.createTextNode(sourcearray[i].text))
 
                 var footer = document.createElement("footer")
+                footer.appendChild(document.createTextNode(sourcearray[i].timestamp))
 
-                footer.appendChild(document.createTextNode(sourcearray[i].chatId))
 
-
+                message.appendChild(header);
+                message.appendChild(p);
                 message.appendChild(footer);
+
                 document.querySelector('.chat-body').append(message)
 
+                        
+                   
             } 
-
+        });
 
          
 
@@ -69,7 +96,7 @@
 
 
             var current_user = -1;
-         getCurentUser()
+            getCurentUserId()
                 .then(data => {
 
             console.log(data2.currentUser);
@@ -106,15 +133,22 @@
             });
         })
 
-        function getCurentUser(){
+        function getCurentUserId(){
 
-            return axios.get('/Chat/GetCurrentUser')
+            return axios.get('/Chat/GetCurrentUserId')
                 .then(response => {
                     this.response = response.data
                     return this.response
                 })
         }
+        function getCurentUserName() {
 
+            return axios.get('/Chat/GetCurrentUserName')
+                .then(response => {
+                    this.response = response.data
+                    return this.response
+                })
+        }
 
         var joinRoom = function () {
             var url = '/Chat/JoinRoom/' + _connectionId + '/@Model.Id'
