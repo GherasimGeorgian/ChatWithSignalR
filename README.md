@@ -6,4 +6,4 @@ SignalR - Real Time Chat Application
 - Private Chat :User Color Green/Blue Chat
 - Notification bell
 - Table messages homepage
-ToDo: Count number of online users
+ToDo: Count number of online users,Add emoji chat,Profile photo
