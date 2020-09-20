@@ -31,12 +31,21 @@ namespace ChatWithSignalR.Controllers
            
             return Ok(User.FindFirst(ClaimTypes.NameIdentifier).Value);
         }
-
+        
         [HttpGet("[action]")]
         public IActionResult GetCurrentUserName()
         {
             var user = _appDbContext.Users
                .Where(x => x.Id == User.FindFirst(ClaimTypes.NameIdentifier).Value)
+               .FirstOrDefault();
+            return Ok(user.UserName);
+        }
+
+        [HttpGet("[action]/{idUser}")]
+        public IActionResult GetUserNameById(string idUser)
+        {
+            var user = _appDbContext.Users
+               .Where(x => x.Id == idUser)
                .FirstOrDefault();
             return Ok(user.UserName);
         }

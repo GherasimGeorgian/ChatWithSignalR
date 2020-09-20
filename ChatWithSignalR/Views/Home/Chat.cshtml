@@ -14,6 +14,14 @@
     }*@
 </div>
 
+<div class="chat_show_users">
+    <p>Members:</p>
+    <ul id="list_users_chat">
+        
+    </ul>
+</div>
+
+
 <form class="chat-input" onsubmit="sendMessage(event)" asp-controller="Home" asp-action="CreateMessage">
     <input type="hidden" name="roomId" value="@Model.Id">
     <input type="text" name="message" id="message-input">
@@ -27,6 +35,31 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script>
 
+        function loadMembersChat() {
+            var sourcearray = JSON.parse('@Html.Raw(Json.Serialize(Model.Users))');
+            for (var i = 0; i < sourcearray.length; i++) {
+                GetUserNameById(sourcearray[i].userId)
+                    .then(data => {
+                        //console.log(data)
+                        var ul = document.getElementById("list_users_chat");
+                        var li = document.createElement("li");
+                        li.classList.add('element_user_list')
+                        li.appendChild(document.createTextNode(data));
+                        ul.appendChild(li);
+                    });
+            }
+           
+        }
+
+        function GetUserNameById(idUser) {
+
+            return axios.get('/Chat/GetUserNameById/' + idUser)
+                .then(response => {
+                    this.response = response.data
+                    return this.response
+                })
+        }
+
 
         function loadMessages() {
 
@@ -35,13 +68,13 @@
 
            var sourcearray = JSON.parse('@Html.Raw(Json.Serialize(Model.Messages))');
             console.log(sourcearray)
-           
+
 
 
             for (var i = 0; i < sourcearray.length; i++) {
-   
+
               var message = document.createElement("div")
-              
+
 
                 if (sourcearray[i].name == data)
                     message.classList.add('message_left')
@@ -71,14 +104,15 @@
 
                 document.querySelector('.chat-body').append(message)
 
-                        
-                   
-            } 
+
+
+            }
         });
 
-         
 
-         }
+
+        }
+        loadMembersChat();
         loadMessages();
 
         var connection = new signalR.HubConnectionBuilder()

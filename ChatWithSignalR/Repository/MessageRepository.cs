@@ -37,7 +37,7 @@ namespace ChatWithSignalR
 
                 
 
-                string commandText = "select  TOP 10 Id, Name, ChatId  from dbo.Messages";
+                string commandText = "select  Id, Name, ChatId  from dbo.Messages";
 
                 SqlCommand cmd = new SqlCommand(commandText, conn);
 
